@@ -92,6 +92,25 @@ trait RevisionableTrait
     {
         return $this->morphMany('\Venturecraft\Revisionable\Revision', 'revisionable');
     }
+    
+    /**
+     * custom data for the user who created this object
+     */
+    public function createdHistory() {
+        $data = $this->revisionHistory;
+
+        foreach($data as $item) {
+            if($item->key == 'created_at') {
+                if(!is_null($item->user_id)) {
+                    return $item->userResponsible()->name;
+                } else {
+                    return 'Cloudcarrier Dashboard';
+                }
+            }
+        }
+
+        return '---';
+    }
 
     /**
      * Generates a list of the last $limit revisions made to any objects of the class it is being called from.
