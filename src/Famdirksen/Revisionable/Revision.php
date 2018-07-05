@@ -1,6 +1,6 @@
 <?php
 
-namespace Venturecraft\Revisionable;
+namespace Famdirksen\Revisionable;
 
 use Illuminate\Database\Eloquent\Model as Eloquent;
 use Illuminate\Support\Facades\Log;

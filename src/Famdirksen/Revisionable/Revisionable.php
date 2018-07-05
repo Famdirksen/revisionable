@@ -1,4 +1,6 @@
-<?php namespace Venturecraft\Revisionable;
+<?php
+
+namespace Famdirksen\Revisionable;
 
 use Illuminate\Database\Eloquent\Model as Eloquent;
 
@@ -11,7 +13,7 @@ use Illuminate\Database\Eloquent\Model as Eloquent;
 
 /**
  * Class Revisionable
- * @package Venturecraft\Revisionable
+ * @package Famdirksen\Revisionable
  */
 class Revisionable extends Eloquent
 {
@@ -79,7 +81,7 @@ class Revisionable extends Eloquent
      */
     public function revisionHistory()
     {
-        return $this->morphMany('\Venturecraft\Revisionable\Revision', 'revisionable');
+        return $this->morphMany('\Famdirksen\Revisionable\Revision', 'revisionable');
     }
 
     /**
@@ -210,7 +212,7 @@ class Revisionable extends Eloquent
                 'created_at' => new \DateTime(),
                 'updated_at' => new \DateTime(),
             );
-            $revision = new \Venturecraft\Revisionable\Revision;
+            $revision = new \Famdirksen\Revisionable\Revision;
             \DB::table($revision->getTable())->insert($revisions);
         }
     }

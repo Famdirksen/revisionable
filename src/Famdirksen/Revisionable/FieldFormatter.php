@@ -1,6 +1,6 @@
 <?php
 
-namespace Venturecraft\Revisionable;
+namespace Famdirksen\Revisionable;
 
 /**
  * FieldFormatter.
@@ -12,7 +12,7 @@ namespace Venturecraft\Revisionable;
 
 /**
  * Class FieldFormatter
- * @package Venturecraft\Revisionable
+ * @package Famdirksen\Revisionable
  */
 class FieldFormatter
 {

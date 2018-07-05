@@ -1,4 +1,6 @@
-<?php namespace Venturecraft\Revisionable;
+<?php
+
+namespace Famdirksen\Revisionable;
 
 /*
  * This file is part of the Revisionable package by Venture Craft
@@ -7,9 +9,11 @@
  *
  */
 
+use Illuminate\Support\Facades\Request;
+
 /**
  * Class RevisionableTrait
- * @package Venturecraft\Revisionable
+ * @package Famdirksen\Revisionable
  */
 trait RevisionableTrait
 {
@@ -90,7 +94,7 @@ trait RevisionableTrait
      */
     public function revisionHistory()
     {
-        return $this->morphMany('\Venturecraft\Revisionable\Revision', 'revisionable');
+        return $this->morphMany('\Famdirksen\Revisionable\Revision', 'revisionable');
     }
     
     /**
@@ -104,7 +108,7 @@ trait RevisionableTrait
                 if(!is_null($item->user_id)) {
                     return $item->userResponsible()->name;
                 } else {
-                    return 'Cloudcarrier Dashboard';
+                    return 'System';
                 }
             }
         }
@@ -121,7 +125,7 @@ trait RevisionableTrait
      */
     public static function classRevisionHistory($limit = 100, $order = 'desc')
     {
-        return \Venturecraft\Revisionable\Revision::where('revisionable_type', get_called_class())
+        return \Famdirksen\Revisionable\Revision::where('revisionable_type', get_called_class())
             ->orderBy('updated_at', $order)->limit($limit)->get();
     }
 
@@ -201,6 +205,7 @@ trait RevisionableTrait
                     'old_value' => array_get($this->originalData, $key),
                     'new_value' => $this->updatedData[$key],
                     'user_id' => $this->getSystemUserId(),
+                    'ip' => $this->getRequestIp(),
                     'created_at' => new \DateTime(),
                     'updated_at' => new \DateTime(),
                 );
@@ -243,6 +248,7 @@ trait RevisionableTrait
                 'old_value' => null,
                 'new_value' => $this->{self::CREATED_AT},
                 'user_id' => $this->getSystemUserId(),
+                'ip' => $this->getRequestIp(),
                 'created_at' => new \DateTime(),
                 'updated_at' => new \DateTime(),
             );
@@ -270,10 +276,11 @@ trait RevisionableTrait
                 'old_value' => null,
                 'new_value' => $this->{$this->getDeletedAtColumn()},
                 'user_id' => $this->getSystemUserId(),
+                'ip' => $this->getRequestIp(),
                 'created_at' => new \DateTime(),
                 'updated_at' => new \DateTime(),
             );
-            $revision = new \Venturecraft\Revisionable\Revision;
+            $revision = new \Famdirksen\Revisionable\Revision;
             \DB::table($revision->getTable())->insert($revisions);
             \Event::fire('revisionable.deleted', array('model' => $this, 'revisions' => $revisions));
         }
@@ -453,5 +460,19 @@ trait RevisionableTrait
             $this->dontKeepRevisionOf = $donts;
             unset($donts);
         }
+    }
+
+
+    /**
+     * Get the IP from where the request came from
+     *
+     * @return null|string
+     */
+    public function getRequestIp() {
+        if(!empty(Request::ip())) {
+            return Request::ip();
+        }
+
+        return null;
     }
 }

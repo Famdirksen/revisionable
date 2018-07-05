@@ -3,16 +3,20 @@
     "license": "MIT",
     "description": "Keep a revision history for your models without thinking, created as a package for use with Laravel",
     "keywords": ["model", "laravel", "ardent", "revision", "history"],
-    "homepage": "http://github.com/venturecraft/revisionable",
+    "homepage": "http://github.com/famdirksen/revisionable",
     "authors": [
         {
             "name": "Chris Duell",
             "email": "me@chrisduell.com"
+        },
+        {
+            "name": "Robin Dirksen",
+            "email": "robin@famdirksen.nl"
         }
     ],
     "support": {
-        "issues": "https://github.com/VentureCraft/revisionable/issues",
-        "source": "https://github.com/VentureCraft/revisionable"
+        "issues": "https://github.com/famdirksen/revisionable/issues",
+        "source": "https://github.com/famdirksen/revisionable"
     },
     "require": {
         "php": ">=5.3.0",
@@ -23,7 +27,7 @@
             "src/migrations"
         ],
         "psr-0": {
-            "Venturecraft\\Revisionable": "src/"
+            "Famdirksen\\Revisionable": "src/"
         }
     }
 }
