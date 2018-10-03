@@ -1,5 +1,3 @@
-<img src="http://famdirksen.com.au/wp-content/uploads/2015/09/REVISIONABLE.png" style="width: 100%" alt="Revisionable" />
-
 [![Laravel 4.x](https://img.shields.io/badge/Laravel-4.x-brightgreen.svg?style=flat-square)](http://laravel.com)
 [![Laravel 5.2](https://img.shields.io/badge/Laravel-5.x-brightgreen.svg?style=flat-square)](http://laravel.com)
 [![Latest Version](https://img.shields.io/github/release/famdirksen/revisionable.svg?style=flat-square)](https://packagist.org/packages/famdirksen/revisionable)
@@ -37,7 +35,7 @@ Add the following to the `require` section of your projects composer.json file:
 Run composer update to download the package
 
 ```
-php composer.phar update
+composer update
 ```
 
 Finally, you'll also need to run migration on the package (Laravel 5.x)
@@ -170,17 +168,17 @@ protected $revisionCreationsEnabled = true;
 No doubt, there'll be cases where you don't want to store a revision history only for certain fields of the model, this is supported in two different ways. In your model you can either specifiy which fields you explicitly want to track and all other fields are ignored:
 
 ```php
-protected $keepRevisionOf = array(
+protected $keepRevisionOf = [
     'title'
-);
+];
 ```
 
 Or, you can specify which fields you explicitly don't want to track. All other fields will be tracked.
 
 ```php
-protected $dontKeepRevisionOf = array(
+protected $dontKeepRevisionOf = [
     'category_id'
-);
+];
 ```
 
 > The `$keepRevisionOf` setting takes precendence over `$dontKeepRevisionOf`
@@ -214,22 +212,22 @@ output of your values, see the [laravel docs for more information on accessors](
 In cases where you want to have control over the format of the output of the values, for example a boolean field, you can set them in the `$revisionFormattedFields` array in your model. e.g.,
 
 ```php
-protected $revisionFormattedFields = array(
+protected $revisionFormattedFields = [
     'title'  => 'string:<strong>%s</strong>',
     'public' => 'boolean:No|Yes',
     'modified' => 'datetime:m/d/Y g:i A',
     'deleted_at' => 'isEmpty:Active|Deleted'
-);
+];
 ```
 
 You can also override the field name output using the `$revisionFormattedFieldNames` array in your model, e.g.,
 
 ```php
-protected $revisionFormattedFieldNames = array(
+protected $revisionFormattedFieldNames = [
     'title' => 'Title',
     'small_name' => 'Nickname',
     'deleted_at' => 'Deleted At'
-);
+];
 ```
 
 This comes into play when you output the revision field name using `$revision->fieldName()`
@@ -356,7 +354,7 @@ $object->disableRevisionField('title'); // Disables title
 or:
 
 ```php
-$object->disableRevisionField(array('title', 'content')); // Disables title and content
+$object->disableRevisionField(['title', 'content']); // Disables title and content
 ```
 
 <a name="contributing"></a>
