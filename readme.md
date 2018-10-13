@@ -26,16 +26,10 @@ Revisionable can also now be used [as a trait](#the-new-trait-based-implementati
 
 Revisionable is installable via [composer](http://getcomposer.org/doc/00-intro.md), the details are on [packagist, here.](https://packagist.org/packages/famdirksen/revisionable)
 
-Add the following to the `require` section of your projects composer.json file:
-
-```php
-"famdirksen/revisionable": "1.*",
-```
-
-Run composer update to download the package
+To add this package to your project, simply run the following command:
 
 ```
-composer update
+composer require famdirksen/revisionable
 ```
 
 Finally, you'll also need to run migration on the package (Laravel 5.x)
