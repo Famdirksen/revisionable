@@ -179,6 +179,8 @@ protected $dontKeepRevisionOf = [
 
 ### Events
 
+!!!!NOT BEING USED ANYMORE!!!!
+
 Every time a model revision is created an event is fired. You can listen for `revisionable.created`,  
 `revisionable.saved` or `revisionable.deleted`.
 
