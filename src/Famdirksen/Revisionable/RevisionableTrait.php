@@ -79,7 +79,7 @@ trait RevisionableTrait
             $model->postSave();
         });
 
-        static::created(function($model){
+        static::created(function ($model) {
             $model->postCreate();
         });
 
@@ -100,12 +100,13 @@ trait RevisionableTrait
     /**
      * custom data for the user who created this object
      */
-    public function createdHistory() {
+    public function createdHistory()
+    {
         $data = $this->revisionHistory;
 
-        foreach($data as $item) {
-            if($item->key == 'created_at') {
-                if(!is_null($item->user_id)) {
+        foreach ($data as $item) {
+            if ($item->key == 'created_at') {
+                if (!is_null($item->user_id)) {
                     return $item->userResponsible()->name;
                 } else {
                     return 'System';
@@ -183,9 +184,9 @@ trait RevisionableTrait
         } else {
             $LimitReached = false;
         }
-        if (isset($this->revisionCleanup)){
+        if (isset($this->revisionCleanup)) {
             $RevisionCleanup=$this->revisionCleanup;
-        }else{
+        } else {
             $RevisionCleanup=false;
         }
 
@@ -212,9 +213,9 @@ trait RevisionableTrait
             }
 
             if (count($revisions) > 0) {
-                if($LimitReached && $RevisionCleanup){
-                    $toDelete = $this->revisionHistory()->orderBy('id','asc')->limit(count($revisions))->get();
-                    foreach($toDelete as $delete){
+                if ($LimitReached && $RevisionCleanup) {
+                    $toDelete = $this->revisionHistory()->orderBy('id', 'asc')->limit(count($revisions))->get();
+                    foreach ($toDelete as $delete) {
                         $delete->delete();
                     }
                 }
@@ -233,14 +234,12 @@ trait RevisionableTrait
 
         // Check if we should store creations in our revision history
         // Set this value to true in your model if you want to
-        if(empty($this->revisionCreationsEnabled))
-        {
+        if (empty($this->revisionCreationsEnabled)) {
             // We should not store creations.
             return false;
         }
 
-        if ((!isset($this->revisionEnabled) || $this->revisionEnabled))
-        {
+        if ((!isset($this->revisionEnabled) || $this->revisionEnabled)) {
             $revisions[] = array(
                 'revisionable_type' => $this->getMorphClass(),
                 'revisionable_id' => $this->getKey(),
@@ -257,7 +256,6 @@ trait RevisionableTrait
             \DB::table($revision->getTable())->insert($revisions);
             //\Event::fire('revisionable.created', array('model' => $this, 'revisions' => $revisions));
         }
-
     }
 
     /**
@@ -468,8 +466,9 @@ trait RevisionableTrait
      *
      * @return null|string
      */
-    public function getRequestIp() {
-        if(!empty(Request::ip())) {
+    public function getRequestIp()
+    {
+        if (!empty(Request::ip())) {
             return Request::ip();
         }
 
