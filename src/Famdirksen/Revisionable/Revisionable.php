@@ -2,14 +2,15 @@
 
 namespace Famdirksen\Revisionable;
 
-use Illuminate\Database\Eloquent\Model as Eloquent;
-
 /*
  * This file is part of the Revisionable package by Venture Craft
  *
  * (c) Venture Craft <http://www.venturecraft.com.au>
  *
  */
+
+use Illuminate\Database\Eloquent\Model as Eloquent;
+use Illuminate\Support\Arr;
 
 /**
  * Class Revisionable
@@ -146,7 +147,7 @@ class Revisionable extends Eloquent
                     'revisionable_type'     => $this->getMorphClass(),
                     'revisionable_id'       => $this->getKey(),
                     'key'                   => $key,
-                    'old_value'             => array_get($this->originalData, $key),
+                    'old_value'             => Arr::get($this->originalData, $key),
                     'new_value'             => $this->updatedData[$key],
                     'user_id'               => $this->getSystemUserId(),
                     'created_at'            => new \DateTime(),

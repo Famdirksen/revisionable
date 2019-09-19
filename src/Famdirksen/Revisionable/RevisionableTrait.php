@@ -10,6 +10,7 @@ namespace Famdirksen\Revisionable;
  */
 
 use Illuminate\Support\Facades\Request;
+use Illuminate\Support\Arr;
 
 /**
  * Class RevisionableTrait
@@ -96,7 +97,7 @@ trait RevisionableTrait
     {
         return $this->morphMany('\Famdirksen\Revisionable\Revision', 'revisionable');
     }
-    
+
     /**
      * custom data for the user who created this object
      */
@@ -203,7 +204,7 @@ trait RevisionableTrait
                     'revisionable_type' => $this->getMorphClass(),
                     'revisionable_id' => $this->getKey(),
                     'key' => $key,
-                    'old_value' => array_get($this->originalData, $key),
+                    'old_value' => Arr::get($this->originalData, $key),
                     'new_value' => $this->updatedData[$key],
                     'user_id' => $this->getSystemUserId(),
                     'ip' => $this->getRequestIp(),
