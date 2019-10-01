@@ -46,7 +46,7 @@ php artisan migrate --package=famdirksen/revisionable
 
 > If you're going to be migrating up and down completely a lot (using `migrate:refresh`), one thing you can do instead is to copy the migration file from the package to your `app/database` folder, and change the classname from `CreateRevisionsTable` to something like `CreateRevisionTable` (without the 's', otherwise you'll get an error saying there's a duplicate class)
 
-> `cp vendor/famdirksen/revisionable/src/migrations/2013_04_09_062329_create_revisions_table.php app/database/migrations/`
+> `cp vendor/famdirksen/revisionable/src/migrations/2013_04_09_062329_create_revisions_table.php database/migrations/2013_04_09_062329_create_revisions_table.php`
 
 ## Docs
 
@@ -107,7 +107,7 @@ If needed, you can disable the revisioning by setting `$revisionEnabled` to fals
 namespace MyApp\Models;
 
 class Article extends Eloquent {
-    use Famdirksen\Revisionable\RevisionableTrait;
+    use \Famdirksen\Revisionable\RevisionableTrait;
 
     protected $revisionEnabled = false;
 }
@@ -119,7 +119,7 @@ You can also disable revisioning after X many revisions have been made by settin
 namespace MyApp\Models;
 
 class Article extends Eloquent {
-    use Famdirksen\Revisionable\RevisionableTrait;
+    use \Famdirksen\Revisionable\RevisionableTrait;
 
     protected $revisionEnabled = true;
     protected $historyLimit = 500; //Stop tracking revisions after 500 changes have been made.
@@ -131,7 +131,7 @@ In order to maintain a limit on history, but instead of stopping tracking revisi
 namespace MyApp\Models;
 
 class Article extends Eloquent {
-    use Famdirksen\Revisionable\RevisionableTrait;
+    use \Famdirksen\Revisionable\RevisionableTrait;
 
     protected $revisionEnabled = true;
     protected $revisionCleanup = true; //Remove old revisions (works only when used with $historyLimit)
@@ -164,7 +164,8 @@ No doubt, there'll be cases where you don't want to store a revision history onl
 
 ```php
 protected $keepRevisionOf = [
-    'title'
+    'title',
+    ...
 ];
 ```
 
@@ -172,7 +173,8 @@ Or, you can specify which fields you explicitly don't want to track. All other f
 
 ```php
 protected $dontKeepRevisionOf = [
-    'category_id'
+    'category_id',
+    ...
 ];
 ```
 
@@ -194,9 +196,9 @@ public function boot(DispatcherContract $events)
     $events->listen('revisionable.*', function($model, $revisions) {
         // Do something with the revisions or the changed model. 
         dd($model, $revisions);
+        ...
     });
 }
-
 ```
 
 <a name="formatoutput"></a>
@@ -213,7 +215,8 @@ protected $revisionFormattedFields = [
     'title'  => 'string:<strong>%s</strong>',
     'public' => 'boolean:No|Yes',
     'modified' => 'datetime:m/d/Y g:i A',
-    'deleted_at' => 'isEmpty:Active|Deleted'
+    'deleted_at' => 'isEmpty:Active|Deleted',
+    ...
 ];
 ```
 
@@ -223,7 +226,8 @@ You can also override the field name output using the `$revisionFormattedFieldNa
 protected $revisionFormattedFieldNames = [
     'title' => 'Title',
     'small_name' => 'Nickname',
-    'deleted_at' => 'Deleted At'
+    'deleted_at' => 'Deleted At',
+    ...
 ];
 ```
 
@@ -368,6 +372,6 @@ All pull requests should be made to the develop branch, so they can be tested be
 If you're having troubles with using this package, odds on someone else has already had the same problem. Two places you can look for common answers to your problems are:
 
 * [StackOverflow revisionable tag](http://stackoverflow.com/questions/tagged/revisionable?sort=newest&pageSize=50)
-* [GitHub Issues](https://github.com/VentureCraft/revisionable/issues?page=1&state=closed)
+* [GitHub Issues](https://github.com/famdirksen/revisionable/issues?page=1&state=closed)
 
 > If you do prefer posting your questions to the public on StackOverflow, please use the 'revisionable' tag.
