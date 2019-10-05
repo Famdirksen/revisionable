@@ -460,7 +460,8 @@ trait RevisionableTrait
      *
      * @return mixed
      */
-    public function deleteRevisions() {
+    public function deleteRevisions()
+    {
         return $this->revisionHistory()
             ->orderBy('id', 'asc')
             ->delete();
