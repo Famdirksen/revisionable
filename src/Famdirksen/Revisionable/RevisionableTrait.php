@@ -458,12 +458,18 @@ trait RevisionableTrait
     /**
      * Delete all the revisions from this object
      *
+     * @param  array|null  $key_fields
      * @return mixed
      */
-    public function deleteRevisions()
+    public function deleteRevisions($key_fields = null)
     {
-        return $this->revisionHistory()
-            ->orderBy('id', 'asc')
+        $query = $this->revisionHistory();
+
+        if (!is_null($key_fields)) {
+            $query->whereIn('key', $key_fields);
+        }
+
+        return $query->orderBy('id', 'asc')
             ->delete();
     }
 
