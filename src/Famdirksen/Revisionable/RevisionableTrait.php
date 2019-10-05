@@ -465,7 +465,7 @@ trait RevisionableTrait
     {
         $query = $this->revisionHistory();
 
-        if(!is_null($key_fields)) {
+        if (!is_null($key_fields)) {
             $query->whereIn('key', $key_fields);
         }
 
