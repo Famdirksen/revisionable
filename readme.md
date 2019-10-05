@@ -15,6 +15,13 @@ So not only can you see a history of what happened, but who did what, so there's
 
 Revisionable is a laravel package that allows you to keep a revision history for your models without thinking. For some background and info, [see this article](http://www.chrisduell.com/blog/development/keeping-revisions-of-your-laravel-model-data/)
 
+## Todo for new features
+Here is a list of features that needs to be made to extend the package.
+* [ ] delete all revisions by a specific user (GDPR - right to be forgotten)
+* [ ] delete all revisions for a specific model
+* [ ] remove specific field(s) from the revisions
+* [ ] export all revision (GDPR - right to see data)
+
 ## Working with 3rd party Auth / Eloquent extensions
 
 Revisionable has support for Auth powered by
