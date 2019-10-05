@@ -2,13 +2,6 @@
 
 namespace Famdirksen\Revisionable;
 
-/*
- * This file is part of the Revisionable package by Venture Craft
- *
- * (c) Venture Craft <http://www.venturecraft.com.au>
- *
- */
-
 use Illuminate\Support\Facades\Request;
 use Illuminate\Support\Arr;
 
@@ -172,11 +165,11 @@ trait RevisionableTrait
         }
     }
 
-
     /**
      * Called after a model is successfully saved.
      *
      * @return void
+     * @throws \Exception
      */
     public function postSave()
     {
@@ -186,15 +179,14 @@ trait RevisionableTrait
             $LimitReached = false;
         }
         if (isset($this->revisionCleanup)) {
-            $RevisionCleanup=$this->revisionCleanup;
+            $RevisionCleanup = $this->revisionCleanup;
         } else {
-            $RevisionCleanup=false;
+            $RevisionCleanup = false;
         }
 
         // check if the model already exists
         if (((!isset($this->revisionEnabled) || $this->revisionEnabled) && $this->updating) && (!$LimitReached || $RevisionCleanup)) {
             // if it does, it means we're updating
-
             $changes_to_record = $this->changedRevisionableFields();
 
             $revisions = array();
@@ -216,10 +208,12 @@ trait RevisionableTrait
             if (count($revisions) > 0) {
                 if ($LimitReached && $RevisionCleanup) {
                     $toDelete = $this->revisionHistory()->orderBy('id', 'asc')->limit(count($revisions))->get();
+
                     foreach ($toDelete as $delete) {
                         $delete->delete();
                     }
                 }
+
                 $revision = new Revision;
                 \DB::table($revision->getTable())->insert($revisions);
                 //\Event::fire('revisionable.saved', array('model' => $this, 'revisions' => $revisions));
@@ -461,6 +455,16 @@ trait RevisionableTrait
         }
     }
 
+    /**
+     * Delete all the revisions from this object
+     *
+     * @return mixed
+     */
+    public function deleteRevisions() {
+        return $this->revisionHistory()
+            ->orderBy('id', 'asc')
+            ->delete();
+    }
 
     /**
      * Get the IP from where the request came from
