@@ -3,14 +3,6 @@
 namespace Famdirksen\Revisionable;
 
 /**
- * FieldFormatter.
- *
- * Allows formatting of fields
- *
- * (c) Venture Craft <http://www.venturecraft.com.au>
- */
-
-/**
  * Class FieldFormatter
  * @package Famdirksen\Revisionable
  */
@@ -98,7 +90,7 @@ class FieldFormatter
 
         return sprintf($format, $value);
     }
-    
+
     /**
      * Format the datetime
      *
@@ -112,7 +104,7 @@ class FieldFormatter
         if (empty($value)) {
             return null;
         }
-        
+
         $datetime = new \DateTime($value);
 
         return $datetime->format($format);

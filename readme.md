@@ -18,7 +18,7 @@ Revisionable is a laravel package that allows you to keep a revision history for
 ## Todo for new features
 Here is a list of features that needs to be made to extend the package.
 * [ ] delete all revisions by a specific user (GDPR - right to be forgotten)
-* [ ] delete all revisions for a specific model
+* [x] delete all revisions for a specific model
 * [ ] remove specific field(s) from the revisions
 * [ ] export all revision (GDPR - right to see data)
 
