@@ -2,6 +2,7 @@
 [![Laravel 5.x](https://img.shields.io/badge/Laravel-5.x-brightgreen.svg?style=flat-square)](https://laravel.com)
 [![Laravel 6.x](https://img.shields.io/badge/Laravel-6.x-brightgreen.svg?style=flat-square)](https://laravel.com)
 [![Laravel 7.x](https://img.shields.io/badge/Laravel-7.x-brightgreen.svg?style=flat-square)](https://laravel.com)
+[![Laravel 8.x](https://img.shields.io/badge/Laravel-8.x-brightgreen.svg?style=flat-square)](https://laravel.com)
 [![Latest Version](https://img.shields.io/github/release/famdirksen/revisionable.svg?style=flat-square)](https://packagist.org/packages/famdirksen/revisionable)
 [![Downloads](https://img.shields.io/packagist/dt/famdirksen/revisionable.svg?style=flat-square)](https://packagist.org/packages/famdirksen/revisionable)
 [![License](http://img.shields.io/badge/license-MIT-brightgreen.svg?style=flat-square)](https://tldrlegal.com/license/mit-license)
