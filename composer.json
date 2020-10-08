@@ -8,10 +8,16 @@
         {
             "name": "Chris Duell",
             "email": "me@chrisduell.com"
-        },
-        {
+        }, {
+            "name": "Famdirksen",
+            "email": "info@famdirksen.nl",
+            "homepage": "https://famdirksen.nl",
+            "role": "Company"
+        }, {
             "name": "Robin Dirksen",
-            "email": "robin@famdirksen.nl"
+            "email": "robin@famdirksen.nl",
+            "homepage": "https://robindirksen.nl",
+            "role": "Developer"
         }
     ],
     "support": {
