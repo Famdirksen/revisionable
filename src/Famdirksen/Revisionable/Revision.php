@@ -245,11 +245,12 @@ class Revision extends Eloquent
 
     /**
      * Get the responsable user for the action based on an eloquent hasOne relation.
-     * 
+     *
      * @return \Illuminate\Database\Eloquent\Relations\HasOne
      * @throws \Exception
      */
-    public function userResponsibleRelation() {
+    public function userResponsibleRelation()
+    {
         $user_model = app('config')->get('auth.model');
 
         if (empty($user_model)) {
