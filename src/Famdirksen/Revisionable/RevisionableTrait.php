@@ -11,6 +11,9 @@ use Illuminate\Support\Arr;
  */
 trait RevisionableTrait
 {
+    use RevisionFormatTrait;
+    use ExceptionReportTrait;
+
     /**
      * @var array
      */
@@ -248,34 +251,6 @@ trait RevisionableTrait
             \DB::table($revision->getTable())->insert($revisions);
             //\Event::fire('revisionable.deleted', array('model' => $this, 'revisions' => $revisions));
         }
-    }
-
-    private function formatRevision($key, $oldValue, $newValue) {
-        $revision = [
-            'revisionable_type' => $this->getMorphClass(),
-            'revisionable_id' => $this->getKey(),
-            'key' => $key,
-            'old_value' => $oldValue,
-            'new_value' => $newValue,
-            'user_id' => null,
-            'ip' => $this->getRequestIp(),
-            'created_at' => new \DateTime(),
-            'updated_at' => new \DateTime(),
-        ];
-
-        $systemUser = $this->getSystemUser();
-
-        if(is_array($systemUser)) {
-            if(isset($systemUser['type']) && ! isset($systemUser['default_type'])) {
-                $revision['user_type'] = $systemUser['type'];
-            }
-
-            if(isset($systemUser['id'])) {
-                $revision['user_id'] = $systemUser['id'];
-            }
-        }
-
-        return $revision;
     }
 
     /**
@@ -525,19 +500,5 @@ trait RevisionableTrait
 
         return $query->orderBy('id', 'asc')
             ->delete();
-    }
-
-    /**
-     * Get the IP from where the request came from
-     *
-     * @return null|string
-     */
-    public function getRequestIp()
-    {
-        if (!empty(Request::ip())) {
-            return Request::ip();
-        }
-
-        return null;
     }
 }
