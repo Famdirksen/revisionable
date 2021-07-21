@@ -223,22 +223,33 @@ class Revision extends Eloquent
         if (empty($this->user_id)) {
             return false;
         }
+
         if (class_exists($class = '\Cartalyst\Sentry\Facades\Laravel\Sentry')
             || class_exists($class = '\Cartalyst\Sentinel\Laravel\Facades\Sentinel')
         ) {
             return $class::findUserById($this->user_id);
         } else {
-            $user_model = app('config')->get('auth.model');
+            // Check if there is an `user_type` set in the revision.
+            $user_model = $this->user_type;
 
+            // Check if the user model is defined in the default auth model.
+            if (empty($user_model)) {
+                $user_model = app('config')->get('auth.model');
+            }
+
+            // Check if the user model is defined in the user-providers model.
             if (empty($user_model)) {
                 $user_model = app('config')->get('auth.providers.users.model');
+
                 if (empty($user_model)) {
                     return false;
                 }
             }
-            if (!class_exists($user_model)) {
+
+            if (! class_exists($user_model)) {
                 return false;
             }
+
             return $user_model::find($this->user_id);
         }
     }
@@ -251,17 +262,21 @@ class Revision extends Eloquent
      */
     public function userResponsibleRelation()
     {
-        $user_model = app('config')->get('auth.model');
+        $user_model = $this->user_type;
+
+        if (empty($user_model)) {
+            $user_model = app('config')->get('auth.model');
+        }
 
         if (empty($user_model)) {
             $user_model = app('config')->get('auth.providers.users.model');
 
             if (empty($user_model)) {
-                throw new \Exception('No user model configured in config:`auth.providers.users.model`.');
+                throw new \Exception('No user model configured in config: `auth.providers.users.model`.');
             }
         }
 
-        if (!class_exists($user_model)) {
+        if (! class_exists($user_model)) {
             throw new \Exception('Configured user model not found as class.');
         }
 
