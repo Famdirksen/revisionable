@@ -283,6 +283,11 @@ class Revision extends Eloquent
         return $this->hasOne($user_model, 'id', 'user_id');
     }
 
+    public function userResponsibleRelationByType()
+    {
+        return $this->morphTo('user');
+    }
+
     /**
      * Returns the object we have the history of
      *
