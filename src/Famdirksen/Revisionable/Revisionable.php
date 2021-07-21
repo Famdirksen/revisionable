@@ -11,6 +11,8 @@ use Illuminate\Support\Arr;
  */
 class Revisionable extends Eloquent
 {
+    use RevisionFormatTrait;
+
     /**
      * @var
      */
@@ -136,16 +138,7 @@ class Revisionable extends Eloquent
             $revisions = array();
 
             foreach ($changes_to_record as $key => $change) {
-                $revisions[] = array(
-                    'revisionable_type'     => $this->getMorphClass(),
-                    'revisionable_id'       => $this->getKey(),
-                    'key'                   => $key,
-                    'old_value'             => Arr::get($this->originalData, $key),
-                    'new_value'             => $this->updatedData[$key],
-                    'user_id'               => $this->getSystemUserId(),
-                    'created_at'            => new \DateTime(),
-                    'updated_at'            => new \DateTime(),
-                );
+                $revisions[] = $this->formatRevision($key, Arr::get($this->originalData, $key), $this->updatedData[$key]);
             }
 
             if (count($revisions) > 0) {
@@ -160,7 +153,6 @@ class Revisionable extends Eloquent
     */
     public function postCreate()
     {
-
         // Check if we should store creations in our revision history
         // Set this value to true in your model if you want to
         if (empty($this->revisionCreationsEnabled)) {
@@ -169,16 +161,7 @@ class Revisionable extends Eloquent
         }
 
         if ((!isset($this->revisionEnabled) || $this->revisionEnabled)) {
-            $revisions[] = array(
-                'revisionable_type' => $this->getMorphClass(),
-                'revisionable_id' => $this->getKey(),
-                'key' => self::CREATED_AT,
-                'old_value' => null,
-                'new_value' => $this->{self::CREATED_AT},
-                'user_id' => $this->getSystemUserId(),
-                'created_at' => new \DateTime(),
-                'updated_at' => new \DateTime(),
-            );
+            $revisions[] = $this->formatRevision(self::CREATED_AT, null, $this->{self::CREATED_AT});
 
             $revision = new Revision;
             \DB::table($revision->getTable())->insert($revisions);
@@ -193,39 +176,11 @@ class Revisionable extends Eloquent
         if ((!isset($this->revisionEnabled) || $this->revisionEnabled)
             && $this->isSoftDelete()
             && $this->isRevisionable($this->getDeletedAtColumn())) {
-            $revisions[] = array(
-                'revisionable_type' => $this->getMorphClass(),
-                'revisionable_id' => $this->getKey(),
-                'key' => $this->getDeletedAtColumn(),
-                'old_value' => null,
-                'new_value' => $this->{$this->getDeletedAtColumn()},
-                'user_id' => $this->getSystemUserId(),
-                'created_at' => new \DateTime(),
-                'updated_at' => new \DateTime(),
-            );
+            $revisions[] = $this->formatRevision($this->getDeletedAtColumn(), null, $this->{$this->getDeletedAtColumn()});
+
             $revision = new \Famdirksen\Revisionable\Revision;
             \DB::table($revision->getTable())->insert($revisions);
         }
-    }
-
-    /**
-     * Attempt to find the user id of the currently logged in user
-     * Supports Cartalyst Sentry/Sentinel based authentication, as well as stock Auth
-     **/
-    private function getSystemUserId()
-    {
-        try {
-            if (class_exists($class = '\Cartalyst\Sentry\Facades\Laravel\Sentry')
-                    || class_exists($class = '\Cartalyst\Sentinel\Laravel\Facades\Sentinel')) {
-                return ($class::check()) ? $class::getUser()->id : null;
-            } elseif (\Auth::check()) {
-                return \Auth::user()->getAuthIdentifier();
-            }
-        } catch (\Exception $e) {
-            return null;
-        }
-
-        return null;
     }
 
     /**
