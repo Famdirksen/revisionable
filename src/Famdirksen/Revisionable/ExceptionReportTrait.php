@@ -11,8 +11,9 @@ use Illuminate\Support\Arr;
  */
 trait ExceptionReportTrait
 {
-    private function reportException(\Exception $e) {
-        if(function_exists('report')) {
+    private function reportException(\Exception $e)
+    {
+        if (function_exists('report')) {
             report($e);
         }
     }
