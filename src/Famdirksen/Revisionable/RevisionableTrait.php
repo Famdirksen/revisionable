@@ -192,17 +192,7 @@ trait RevisionableTrait
             $revisions = array();
 
             foreach ($changes_to_record as $key => $change) {
-                $revisions[] = array(
-                    'revisionable_type' => $this->getMorphClass(),
-                    'revisionable_id' => $this->getKey(),
-                    'key' => $key,
-                    'old_value' => Arr::get($this->originalData, $key),
-                    'new_value' => $this->updatedData[$key],
-                    'user_id' => $this->getSystemUserId(),
-                    'ip' => $this->getRequestIp(),
-                    'created_at' => new \DateTime(),
-                    'updated_at' => new \DateTime(),
-                );
+                $revisions[] = $this->formatRevision($key, Arr::get($this->originalData, $key), $this->updatedData[$key]);
             }
 
             if (count($revisions) > 0) {
@@ -235,17 +225,7 @@ trait RevisionableTrait
         }
 
         if ((!isset($this->revisionEnabled) || $this->revisionEnabled)) {
-            $revisions[] = array(
-                'revisionable_type' => $this->getMorphClass(),
-                'revisionable_id' => $this->getKey(),
-                'key' => self::CREATED_AT,
-                'old_value' => null,
-                'new_value' => $this->{self::CREATED_AT},
-                'user_id' => $this->getSystemUserId(),
-                'ip' => $this->getRequestIp(),
-                'created_at' => new \DateTime(),
-                'updated_at' => new \DateTime(),
-            );
+            $revisions[] = $this->formatRevision(self::CREATED_AT, null, $this->{self::CREATED_AT});
 
             $revision = new Revision;
             \DB::table($revision->getTable())->insert($revisions);
@@ -262,21 +242,40 @@ trait RevisionableTrait
             && $this->isSoftDelete()
             && $this->isRevisionable($this->getDeletedAtColumn())
         ) {
-            $revisions[] = array(
-                'revisionable_type' => $this->getMorphClass(),
-                'revisionable_id' => $this->getKey(),
-                'key' => $this->getDeletedAtColumn(),
-                'old_value' => null,
-                'new_value' => $this->{$this->getDeletedAtColumn()},
-                'user_id' => $this->getSystemUserId(),
-                'ip' => $this->getRequestIp(),
-                'created_at' => new \DateTime(),
-                'updated_at' => new \DateTime(),
-            );
+            $revisions[] = $this->formatRevision($this->getDeletedAtColumn(), null, $this->{$this->getDeletedAtColumn()});
+
             $revision = new \Famdirksen\Revisionable\Revision;
             \DB::table($revision->getTable())->insert($revisions);
             //\Event::fire('revisionable.deleted', array('model' => $this, 'revisions' => $revisions));
         }
+    }
+
+    private function formatRevision($key, $oldValue, $newValue) {
+        $revision = [
+            'revisionable_type' => $this->getMorphClass(),
+            'revisionable_id' => $this->getKey(),
+            'key' => $key,
+            'old_value' => $oldValue,
+            'new_value' => $newValue,
+            'user_id' => null,
+            'ip' => $this->getRequestIp(),
+            'created_at' => new \DateTime(),
+            'updated_at' => new \DateTime(),
+        ];
+
+        $systemUser = $this->getSystemUser();
+
+        if(is_array($systemUser)) {
+            if(isset($systemUser['type']) && ! isset($systemUser['default_type'])) {
+                $revision['user_type'] = $systemUser['type'];
+            }
+
+            if(isset($systemUser['id'])) {
+                $revision['user_id'] = $systemUser['id'];
+            }
+        }
+
+        return $revision;
     }
 
     /**
@@ -285,20 +284,75 @@ trait RevisionableTrait
      **/
     public function getSystemUserId()
     {
+        $systemUser = $this->getSystemUser();
+
+        if(is_null($systemUser)) {
+            return $systemUser;
+        }
+
+        try {
+            if(is_array($systemUser)) {
+                if(isset($systemUser['id'])) {
+                    return $systemUser['id'];
+                }
+            }
+
+            throw new \Exception('No `id` found for the authenticated system user.');
+        } catch (\Exception $e) {
+            $this->reportException($e);
+        }
+
+        return null;
+    }
+
+    public function getSystemUser()
+    {
         try {
             if (class_exists($class = '\SleepingOwl\AdminAuth\Facades\AdminAuth')
                 || class_exists($class = '\Cartalyst\Sentry\Facades\Laravel\Sentry')
                 || class_exists($class = '\Cartalyst\Sentinel\Laravel\Facades\Sentinel')
             ) {
-                return ($class::check()) ? $class::getUser()->id : null;
+                if(! $class::check()) {
+                    return null;
+                }
+
+                return [
+                    'type' => $class,
+                    'id' => $class::getUser()->id,
+                ];
             } elseif (\Auth::check()) {
-                return \Auth::user()->getAuthIdentifier();
+                $user = \Auth::user();
+
+                return [
+                    'default_type' => true, // Default auth guard used, so no need to store user_type...
+
+                    'type' => get_class($user),
+                    'id' => $user->getAuthIdentifier(),
+                ];
+            }
+
+            // Check all other auth-guards for logged in states
+            foreach(app('config')->get('auth.guards', []) as $guard => $guardConfig) {
+                $authGuard = \Auth::guard($guard);
+
+                if($authGuard->check()) {
+                    return [
+                        'type' => get_class($authGuard->user()),
+                        'id' => $authGuard->user()->getAuthIdentifier(),
+                    ];
+                }
             }
         } catch (\Exception $e) {
-            return null;
+            $this->reportException($e);
         }
 
         return null;
+    }
+
+    private function reportException(\Exception $e) {
+        if(function_exists('report')) {
+            report($e);
+        }
     }
 
     /**
