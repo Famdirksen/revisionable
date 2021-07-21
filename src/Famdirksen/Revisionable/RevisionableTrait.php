@@ -261,13 +261,13 @@ trait RevisionableTrait
     {
         $systemUser = $this->getSystemUser();
 
-        if(is_null($systemUser)) {
+        if (is_null($systemUser)) {
             return $systemUser;
         }
 
         try {
-            if(is_array($systemUser)) {
-                if(isset($systemUser['id'])) {
+            if (is_array($systemUser)) {
+                if (isset($systemUser['id'])) {
                     return $systemUser['id'];
                 }
             }
@@ -287,7 +287,7 @@ trait RevisionableTrait
                 || class_exists($class = '\Cartalyst\Sentry\Facades\Laravel\Sentry')
                 || class_exists($class = '\Cartalyst\Sentinel\Laravel\Facades\Sentinel')
             ) {
-                if(! $class::check()) {
+                if (! $class::check()) {
                     return null;
                 }
 
@@ -307,10 +307,10 @@ trait RevisionableTrait
             }
 
             // Check all other auth-guards for logged in states
-            foreach(app('config')->get('auth.guards', []) as $guard => $guardConfig) {
+            foreach (app('config')->get('auth.guards', []) as $guard => $guardConfig) {
                 $authGuard = \Auth::guard($guard);
 
-                if($authGuard->check()) {
+                if ($authGuard->check()) {
                     return [
                         'type' => get_class($authGuard->user()),
                         'id' => $authGuard->user()->getAuthIdentifier(),
@@ -324,8 +324,9 @@ trait RevisionableTrait
         return null;
     }
 
-    private function reportException(\Exception $e) {
-        if(function_exists('report')) {
+    private function reportException(\Exception $e)
+    {
+        if (function_exists('report')) {
             report($e);
         }
     }

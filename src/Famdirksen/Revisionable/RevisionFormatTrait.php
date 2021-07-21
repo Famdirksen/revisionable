@@ -13,7 +13,8 @@ trait RevisionFormatTrait
 {
     use SystemUserTrait;
 
-    private function formatRevision($key, $oldValue, $newValue) {
+    private function formatRevision($key, $oldValue, $newValue)
+    {
         $revision = [
             'revisionable_type' => $this->getMorphClass(),
             'revisionable_id' => $this->getKey(),
@@ -28,12 +29,12 @@ trait RevisionFormatTrait
 
         $systemUser = $this->getSystemUser();
 
-        if(is_array($systemUser)) {
-            if(isset($systemUser['type']) && ! isset($systemUser['default_type'])) {
+        if (is_array($systemUser)) {
+            if (isset($systemUser['type']) && ! isset($systemUser['default_type'])) {
                 $revision['user_type'] = $systemUser['type'];
             }
 
-            if(isset($systemUser['id'])) {
+            if (isset($systemUser['id'])) {
                 $revision['user_id'] = $systemUser['id'];
             }
         }
