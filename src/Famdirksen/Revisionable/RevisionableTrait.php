@@ -311,7 +311,7 @@ trait RevisionableTrait
                 $authGuard = \Auth::guard($guard);
 
                 if ($authGuard->check()) {
-                    if(is_bool($authGuard->user())) {
+                    if (is_bool($authGuard->user())) {
                         return null;
                     }
                     
