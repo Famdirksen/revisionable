@@ -311,6 +311,10 @@ trait RevisionableTrait
                 $authGuard = \Auth::guard($guard);
 
                 if ($authGuard->check()) {
+                    if(is_bool($authGuard->user())) {
+                        return null;
+                    }
+                    
                     return [
                         'type' => get_class($authGuard->user()),
                         'id' => $authGuard->user()->getAuthIdentifier(),
