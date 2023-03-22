@@ -128,7 +128,6 @@ class Revisionable extends Eloquent
      */
     public function postSave()
     {
-
         // check if the model already exists
         if ((!isset($this->revisionEnabled) || $this->revisionEnabled) && $this->updating) {
             // if it does, it means we're updating
@@ -219,7 +218,6 @@ class Revisionable extends Eloquent
      */
     private function isRevisionable($key)
     {
-
         // If the field is explicitly revisionable, then return true.
         // If it's explicitly not revisionable, return false.
         // Otherwise, if neither condition is met, only return true if
