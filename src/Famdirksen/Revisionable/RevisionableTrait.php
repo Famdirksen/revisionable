@@ -219,7 +219,6 @@ trait RevisionableTrait
     */
     public function postCreate()
     {
-
         // Check if we should store creations in our revision history
         // Set this value to true in your model if you want to
         if (empty($this->revisionCreationsEnabled)) {
@@ -371,7 +370,6 @@ trait RevisionableTrait
      */
     private function isRevisionable($key)
     {
-
         // If the field is explicitly revisionable, then return true.
         // If it's explicitly not revisionable, return false.
         // Otherwise, if neither condition is met, only return true if
