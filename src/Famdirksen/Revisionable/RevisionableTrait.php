@@ -298,7 +298,7 @@ trait RevisionableTrait
                 $user = \Auth::user();
 
                 return [
-                    'default_type' => true, // Default auth guard used, so no need to store user_type...
+                    // 'default_type' => true, // Default auth guard used, so no need to store user_type...
 
                     'type' => get_class($user),
                     'id' => $user->getAuthIdentifier(),
