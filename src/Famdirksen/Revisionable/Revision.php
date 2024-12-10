@@ -17,8 +17,12 @@ class Revision extends Eloquent
      */
     protected $revisionFormattedFields = array();
 
+    protected $casts = [
+        'context' => 'json',
+    ];
+
     /**
-     * @param array $attributes
+     * @param  array  $attributes
      */
     public function __construct(array $attributes = array())
     {
@@ -49,11 +53,13 @@ class Revision extends Eloquent
     {
         if ($formatted = $this->formatFieldName($this->key)) {
             return $formatted;
-        } elseif (strpos($this->key, '_id')) {
-            return str_replace('_id', '', $this->key);
-        } else {
-            return $this->key;
         }
+
+        if (strpos($this->key, '_id')) {
+            return str_replace('_id', '', $this->key);
+        }
+
+        return $this->key;
     }
 
     /**
@@ -110,13 +116,13 @@ class Revision extends Eloquent
      * Responsible for actually doing the grunt work for getting the
      * old or new value for the revision.
      *
-     * @param  string $which old or new
+     * @param  string  $which  old or new
      *
      * @return string value
      */
     private function getValue($which = 'new')
     {
-        $which_value = $which . '_value';
+        $which_value = $which.'_value';
 
         // First find the main model that was updated
         $main_model = $this->revisionable_type;
@@ -129,10 +135,10 @@ class Revision extends Eloquent
                     $related_model = $this->getRelatedModel();
 
                     // Now we can find out the namespace of of related model
-                    if (!method_exists($main_model, $related_model)) {
+                    if (! method_exists($main_model, $related_model)) {
                         $related_model = camel_case($related_model); // for cases like published_status_id
-                        if (!method_exists($main_model, $related_model)) {
-                            throw new \Exception('Relation ' . $related_model . ' does not exist for ' . $main_model);
+                        if (! method_exists($main_model, $related_model)) {
+                            throw new \Exception('Relation '.$related_model.' does not exist for '.$main_model);
                         }
                     }
                     $related_class = $main_model->$related_model()->getRelated();
@@ -146,7 +152,8 @@ class Revision extends Eloquent
 
                         return $item->getRevisionNullString();
                     }
-                    if (!$item) {
+
+                    if (! $item) {
                         $item = new $related_class;
 
                         return $this->format($this->key, $item->getRevisionUnknownString());
@@ -155,7 +162,7 @@ class Revision extends Eloquent
                     // Check if model use RevisionableTrait
                     if (method_exists($item, 'identifiableName')) {
                         // see if there's an available mutator
-                        $mutator = 'get' . studly_case($this->key) . 'Attribute';
+                        $mutator = 'get'.studly_case($this->key).'Attribute';
                         if (method_exists($item, $mutator)) {
                             return $this->format($item->$mutator($this->key), $item->identifiableName());
                         }
@@ -166,13 +173,14 @@ class Revision extends Eloquent
             } catch (\Exception $e) {
                 // Just a fail-safe, in the case the data setup isn't as expected
                 // Nothing to do here.
-                Log::info('Revisionable: ' . $e);
+                Log::info('Revisionable: '.$e);
             }
 
             // if there was an issue
             // or, if it's a normal value
 
-            $mutator = 'get' . studly_case($this->key) . 'Attribute';
+            $mutator = 'get'.studly_case($this->key).'Attribute';
+
             if (method_exists($main_model, $mutator)) {
                 return $this->format($this->key, $main_model->$mutator($this->$which_value));
             }
@@ -228,30 +236,30 @@ class Revision extends Eloquent
             || class_exists($class = '\Cartalyst\Sentinel\Laravel\Facades\Sentinel')
         ) {
             return $class::findUserById($this->user_id);
-        } else {
-            // Check if there is an `user_type` set in the revision.
-            $user_model = $this->user_type;
+        }
 
-            // Check if the user model is defined in the default auth model.
+        // Check if there is an `user_type` set in the revision.
+        $user_model = $this->user_type;
+
+        // Check if the user model is defined in the default auth model.
+        if (empty($user_model)) {
+            $user_model = app('config')->get('auth.model');
+        }
+
+        // Check if the user model is defined in the user-providers model.
+        if (empty($user_model)) {
+            $user_model = app('config')->get('auth.providers.users.model');
+
             if (empty($user_model)) {
-                $user_model = app('config')->get('auth.model');
-            }
-
-            // Check if the user model is defined in the user-providers model.
-            if (empty($user_model)) {
-                $user_model = app('config')->get('auth.providers.users.model');
-
-                if (empty($user_model)) {
-                    return false;
-                }
-            }
-
-            if (! class_exists($user_model)) {
                 return false;
             }
-
-            return $user_model::find($this->user_id);
         }
+
+        if (! class_exists($user_model)) {
+            return false;
+        }
+
+        return $user_model::find($this->user_id);
     }
 
     /**
@@ -325,8 +333,8 @@ class Revision extends Eloquent
 
         if (isset($revisionFormattedFields[$key])) {
             return FieldFormatter::format($key, $value, $revisionFormattedFields);
-        } else {
-            return $value;
         }
+
+        return $value;
     }
 }
