@@ -39,6 +39,15 @@ trait RevisionFormatTrait
             }
         }
 
+        // Check if the Context class exists and the all method is callable
+        if (class_exists(\Illuminate\Support\Facades\Context::class)) {
+            $revision['context'] = \Illuminate\Support\Facades\Context::all();
+
+            if (! is_null($revision['context'])) {
+                $revision['context'] = json_encode($revision['context']);
+            }
+        }
+
         return $revision;
     }
 
