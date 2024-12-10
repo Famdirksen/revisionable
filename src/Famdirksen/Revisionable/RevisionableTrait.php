@@ -105,9 +105,9 @@ trait RevisionableTrait
             if ($item->key == 'created_at') {
                 if (!is_null($item->user_id)) {
                     return $item->userResponsible()->name;
-                } else {
-                    return 'System';
                 }
+                
+                return 'System';
             }
         }
 
@@ -124,7 +124,9 @@ trait RevisionableTrait
     public static function classRevisionHistory($limit = 100, $order = 'desc')
     {
         return \Famdirksen\Revisionable\Revision::where('revisionable_type', get_called_class())
-            ->orderBy('updated_at', $order)->limit($limit)->get();
+            ->orderBy('updated_at', $order)
+            ->limit($limit)
+            ->get();
     }
 
     /**
@@ -343,6 +345,7 @@ trait RevisionableTrait
     private function changedRevisionableFields()
     {
         $changes_to_record = array();
+        
         foreach ($this->dirtyData as $key => $value) {
             // check that the field is revisionable, and double check
             // that it's actually new data in case dirty is, well, clean
@@ -377,6 +380,7 @@ trait RevisionableTrait
         if (isset($this->doKeep) && in_array($key, $this->doKeep)) {
             return true;
         }
+        
         if (isset($this->dontKeep) && in_array($key, $this->dontKeep)) {
             return false;
         }
@@ -475,6 +479,7 @@ trait RevisionableTrait
         if (!isset($this->dontKeepRevisionOf)) {
             $this->dontKeepRevisionOf = array();
         }
+        
         if (is_array($field)) {
             foreach ($field as $one_field) {
                 $this->disableRevisionField($one_field);
@@ -501,7 +506,8 @@ trait RevisionableTrait
             $query->whereIn('key', $key_fields);
         }
 
-        return $query->orderBy('id', 'asc')
+        return $query
+            ->orderBy('id', 'asc')
             ->delete();
     }
 }
