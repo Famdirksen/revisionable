@@ -22,6 +22,7 @@ trait RevisionFormatTrait
             'old_value' => $oldValue,
             'new_value' => $newValue,
             'user_id' => null,
+            'api_token_id' => $this->getApiTokenId(),
             'ip' => $this->getRequestIp(),
             'created_at' => new \DateTime(),
             'updated_at' => new \DateTime(),
