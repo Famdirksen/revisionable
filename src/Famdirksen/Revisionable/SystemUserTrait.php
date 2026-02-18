@@ -3,22 +3,14 @@
 namespace Famdirksen\Revisionable;
 
 use Illuminate\Support\Facades\Request;
-use Illuminate\Support\Arr;
 
 /**
- * Class RevisionableTrait
+ * Class SystemUserTrait
  * @package Famdirksen\Revisionable
  */
 trait SystemUserTrait
 {
     use ExceptionReportTrait;
-
-    /**
-     * Cache the token ID to prevent repeated lookups during the same request loop
-     * @var string|int|null
-     */
-    protected $apiTokenIdCache = null;
-    protected $apiTokenIdChecked = false;
 
     /**
      * Attempt to find the user id of the currently logged in user
@@ -93,52 +85,48 @@ trait SystemUserTrait
     
     /**
      * Attempt to get the ID of the current API token.
-     * Use caching to avoid re-checking for every field update.
+     * Supports Laravel Sanctum and Laravel Passport.
      *
      * @return string|int|null
      */
     protected function getApiTokenId()
     {
-        if ($this->apiTokenIdChecked) {
-            return $this->apiTokenIdCache;
+        // 1. Check config (fastest check first)
+        if (!config('revisionable.store_api_token', false)) {
+            return null;
         }
 
-        $this->apiTokenIdChecked = true;
-
-        // Attempt to get the user from the request or the Auth facade
+        // 2. Get user (cached in memory by Laravel)
         $user = request()->user() ?? \Illuminate\Support\Facades\Auth::user();
 
         if (!$user) {
-            return $this->apiTokenIdCache = null;
+            return null;
         }
 
-        // Check optional user method override
+        // 3. Check optional user method override
+        // This allows the user model to explicitly allow/disallow token storage
         if (method_exists($user, 'shouldStoreUsedApiToken')) {
             if (!$user->shouldStoreUsedApiToken()) {
-                return $this->apiTokenIdCache = null;
+                return null;
             }
         } 
-        // Fallback to config
-        elseif (!config('revisionable.store_api_token', false)) {
-            return $this->apiTokenIdCache = null;
-        }
 
-        // Sanctum check
+        // 4. Sanctum check
         if (method_exists($user, 'currentAccessToken')) {
             $token = $user->currentAccessToken();
             if ($token) {
-                return $this->apiTokenIdCache = $token->id;
+                return $token->id;
             }
         }
 
-        // Passport check
+        // 5. Passport check
         if (method_exists($user, 'token')) {
             $token = $user->token();
             if ($token) {
-                return $this->apiTokenIdCache = $token->id;
+                return $token->id;
             }
         }
 
-        return $this->apiTokenIdCache = null;
+        return null;
     }
 }
