@@ -31,6 +31,10 @@ trait RevisionFormatTrait
             $revision['api_token_id'] = $this->getApiTokenId();
         }
 
+        if ($this->getPassportTokenId()) {
+            $revision['passport_token_id'] = $this->getPassportTokenId();
+        }
+
         $systemUser = $this->getSystemUser();
 
         if (is_array($systemUser)) {

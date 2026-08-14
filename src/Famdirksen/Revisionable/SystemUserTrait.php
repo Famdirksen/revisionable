@@ -119,9 +119,37 @@ trait SystemUserTrait
             }
         }
 
-        // 5. Passport check
+        return null;
+    }
+
+    /**
+     * Attempt to get the ID of the current Passport OAuth token, kept in its own
+     * column (see getApiTokenId()) so it can't collide with a Sanctum PAT id.
+     *
+     * Opt-in: returns null unless `revisionable.store_passport_token` is true.
+     * Existing consumers that never touch this config key see no change.
+     *
+     * @return string|null
+     */
+    protected function getPassportTokenId()
+    {
+        if (! config('revisionable.store_passport_token', false)) {
+            return null;
+        }
+
+        $user = request()->user() ?? \Illuminate\Support\Facades\Auth::user();
+
+        if (! $user) {
+            return null;
+        }
+
+        if (method_exists($user, 'shouldStoreUsedApiToken') && ! $user->shouldStoreUsedApiToken()) {
+            return null;
+        }
+
         if (method_exists($user, 'token')) {
             $token = $user->token();
+
             if ($token) {
                 return $token->id;
             }
