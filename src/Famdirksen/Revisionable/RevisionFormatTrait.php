@@ -45,6 +45,10 @@ trait RevisionFormatTrait
             if (isset($systemUser['id'])) {
                 $revision['user_id'] = $systemUser['id'];
             }
+
+            if (isset($systemUser['guard'])) {
+                $revision['guard'] = $systemUser['guard'];
+            }
         }
 
         // Check if the Context class exists and the all method is callable

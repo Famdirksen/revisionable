@@ -62,18 +62,33 @@ trait SystemUserTrait
 
                     'type' => get_class($user),
                     'id' => $user->getAuthIdentifier(),
+                    'guard' => config('auth.defaults.guard'),
                 ];
             }
 
-            // Check all other auth-guards for logged in states
+            // Check all other auth-guards for logged in states. Each guard is
+            // tried in its own try/catch: a guard that fails to even construct
+            // (e.g. Passport's guard when its RSA keys aren't readable on this
+            // server) must not prevent checking the remaining guards, or abort
+            // system-user detection entirely.
             foreach (app('config')->get('auth.guards', []) as $guard => $guardConfig) {
-                $authGuard = \Auth::guard($guard);
+                try {
+                    $authGuard = \Auth::guard($guard);
 
-                if ($authGuard->check()) {
-                    return [
-                        'type' => get_class($authGuard->user()),
-                        'id' => $authGuard->user()->getAuthIdentifier(),
-                    ];
+                    if ($authGuard->check()) {
+                        if (is_bool($authGuard->user())) {
+                            return null;
+                        }
+
+                        return [
+                            'type' => get_class($authGuard->user()),
+                            'id' => $authGuard->user()->getAuthIdentifier(),
+                            'guard' => $guard,
+                        ];
+                    }
+                } catch (\Throwable $e) {
+                    $this->reportException($e);
+                    continue;
                 }
             }
         } catch (\Exception $e) {
@@ -82,7 +97,7 @@ trait SystemUserTrait
 
         return null;
     }
-    
+
     /**
      * Attempt to get the ID of the current API token.
      * Supports Laravel Sanctum and Laravel Passport.
@@ -109,7 +124,7 @@ trait SystemUserTrait
             if (!$user->shouldStoreUsedApiToken()) {
                 return null;
             }
-        } 
+        }
 
         // 4. Sanctum check
         if (method_exists($user, 'currentAccessToken')) {

@@ -12,7 +12,6 @@ use Illuminate\Support\Arr;
 trait RevisionableTrait
 {
     use RevisionFormatTrait;
-    use ExceptionReportTrait;
 
     /**
      * @var array
@@ -106,7 +105,7 @@ trait RevisionableTrait
                 if (!is_null($item->user_id)) {
                     return $item->userResponsible()->name;
                 }
-                
+
                 return 'System';
             }
         }
@@ -255,88 +254,6 @@ trait RevisionableTrait
     }
 
     /**
-     * Attempt to find the user id of the currently logged in user
-     * Supports Cartalyst Sentry/Sentinel based authentication, as well as stock Auth
-     **/
-    public function getSystemUserId()
-    {
-        $systemUser = $this->getSystemUser();
-
-        if (is_null($systemUser)) {
-            return $systemUser;
-        }
-
-        try {
-            if (is_array($systemUser)) {
-                if (isset($systemUser['id'])) {
-                    return $systemUser['id'];
-                }
-            }
-
-            throw new \Exception('No `id` found for the authenticated system user.');
-        } catch (\Exception $e) {
-            $this->reportException($e);
-        }
-
-        return null;
-    }
-
-    public function getSystemUser()
-    {
-        try {
-            if (class_exists($class = '\SleepingOwl\AdminAuth\Facades\AdminAuth')
-                || class_exists($class = '\Cartalyst\Sentry\Facades\Laravel\Sentry')
-                || class_exists($class = '\Cartalyst\Sentinel\Laravel\Facades\Sentinel')
-            ) {
-                if (! $class::check()) {
-                    return null;
-                }
-
-                return [
-                    'type' => $class,
-                    'id' => $class::getUser()->id,
-                ];
-            } elseif (\Auth::check()) {
-                $user = \Auth::user();
-
-                return [
-                    // 'default_type' => true, // Default auth guard used, so no need to store user_type...
-
-                    'type' => get_class($user),
-                    'id' => $user->getAuthIdentifier(),
-                ];
-            }
-
-            // Check all other auth-guards for logged in states
-            foreach (app('config')->get('auth.guards', []) as $guard => $guardConfig) {
-                $authGuard = \Auth::guard($guard);
-
-                if ($authGuard->check()) {
-                    if (is_bool($authGuard->user())) {
-                        return null;
-                    }
-                    
-                    return [
-                        'type' => get_class($authGuard->user()),
-                        'id' => $authGuard->user()->getAuthIdentifier(),
-                    ];
-                }
-            }
-        } catch (\Exception $e) {
-            $this->reportException($e);
-        }
-
-        return null;
-    }
-
-    private function reportException(\Exception $e)
-    {
-        if (function_exists('report')) {
-            report($e);
-        }
-    }
-
-    /**
      * Get all of the changes that have been made, that are also supposed
      * to have their changes recorded
      *
@@ -345,7 +262,7 @@ trait RevisionableTrait
     private function changedRevisionableFields()
     {
         $changes_to_record = array();
-        
+
         foreach ($this->dirtyData as $key => $value) {
             // check that the field is revisionable, and double check
             // that it's actually new data in case dirty is, well, clean
@@ -380,7 +297,7 @@ trait RevisionableTrait
         if (isset($this->doKeep) && in_array($key, $this->doKeep)) {
             return true;
         }
-        
+
         if (isset($this->dontKeep) && in_array($key, $this->dontKeep)) {
             return false;
         }
@@ -479,7 +396,7 @@ trait RevisionableTrait
         if (!isset($this->dontKeepRevisionOf)) {
             $this->dontKeepRevisionOf = array();
         }
-        
+
         if (is_array($field)) {
             foreach ($field as $one_field) {
                 $this->disableRevisionField($one_field);
