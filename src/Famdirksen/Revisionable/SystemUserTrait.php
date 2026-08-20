@@ -129,12 +129,65 @@ trait SystemUserTrait
         // 4. Sanctum check
         if (method_exists($user, 'currentAccessToken')) {
             $token = $user->currentAccessToken();
+
+            if ($token && $this->isPassportToken($user, $token)) {
+                return null;
+            }
+
             if ($token) {
                 return $token->id;
             }
         }
 
         return null;
+    }
+
+    /**
+     * Whether the token returned by currentAccessToken() is in fact the Passport
+     * OAuth token, which belongs in passport_token_id instead.
+     *
+     * An application may expose a single currentAccessToken() that returns either
+     * a Sanctum personal access token or a Passport OAuth token, so both guards
+     * can be used side by side — Sanctum's and Passport's HasApiTokens traits
+     * collide on this method name, so they cannot both be applied to one model.
+     * Without this check the Passport token is reported as a Sanctum PAT and the
+     * same id is written to api_token_id and passport_token_id.
+     *
+     * Detected two ways, because neither alone is sufficient. The class check
+     * covers Passport's own token types across major versions -- the list is
+     * deliberately broad since `instanceof` against a class that is not
+     * installed simply yields false, and a Sanctum token can never match a
+     * Laravel\Passport type. The identity check then covers applications that
+     * hand back a wrapper or proxy of their own class: if the model's Passport
+     * accessor returns this very object, it is the Passport token whatever its
+     * class.
+     *
+     * @param  \Illuminate\Contracts\Auth\Authenticatable|mixed  $user
+     * @param  mixed  $token
+     * @return bool
+     */
+    protected function isPassportToken($user, $token)
+    {
+        // ScopeAuthorizable covers AccessToken and TransientToken on Passport 13+;
+        // Token is the Eloquent model older token guards hand over and does not
+        // implement that contract. Entries for classes that are not installed are
+        // harmless -- `instanceof` against an unknown class is false and triggers
+        // no autoloading. Kept as a local array rather than a constant, because
+        // constants in traits require PHP 8.2 and this package supports far older.
+        $passportTokenTypes = array(
+            'Laravel\Passport\Contracts\ScopeAuthorizable',
+            'Laravel\Passport\AccessToken',
+            'Laravel\Passport\Token',
+            'Laravel\Passport\TransientToken',
+        );
+
+        foreach ($passportTokenTypes as $type) {
+            if ($token instanceof $type) {
+                return true;
+            }
+        }
+
+        return method_exists($user, 'token') && $user->token() === $token;
     }
 
     /**
