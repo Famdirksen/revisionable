@@ -38,7 +38,7 @@ trait RevisionFormatTrait
         $systemUser = $this->getSystemUser();
 
         if (is_array($systemUser)) {
-            if (isset($systemUser['type']) && ! isset($systemUser['default_type'])) {
+            if (isset($systemUser['type'])) {
                 $revision['user_type'] = $systemUser['type'];
             }
 
